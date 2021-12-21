@@ -1,6 +1,6 @@
 {
   "name": "el-table-massdata",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Based on element-ui 2.15.7",
   "main": "index.js",
   "scripts": {
