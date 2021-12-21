@@ -1,0 +1,19 @@
+{
+  "name": "el-table-plus",
+  "version": "1.0.0",
+  "description": "Based on element-ui 2.15.7",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run serve"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cobrAJ/ELTablePlus.git"
+  },
+  "author": "cobraj",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cobrAJ/ELTablePlus/issues"
+  },
+  "homepage": "https://github.com/cobrAJ/ELTablePlus#readme"
+}
