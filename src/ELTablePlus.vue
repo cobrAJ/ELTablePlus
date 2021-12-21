@@ -21,20 +21,12 @@ export default {
     }
   },
   render (h) {
-    return <el-table
-      class="el-table-plus"
-      ref="elTable"
-      {...{ class: this.$class }}
-      {...{ attrs: this.$attrs }}
-      {...{ props: this.$props }}
-      {...{ on: this.$listeners }}
-      data={this.tableData}
-      max-height={this.$attrs['max-height'] || this.selfMaxHeight}
-      vOn:select={this.selfSelect}
-      vOn:selection-change={this.selfSelectionChange}
-    >
-      {...this.$slots.default}
-    </el-table >
+    return h("el-table", {
+      class: { 'el-table-plus': true, ...this.$class },
+      attrs: { ...this.$attrs, 'data': this.tableData, "max-height": this.$attrs['max-height'] || this.selfMaxHeight },
+      props: { ...this.$props },
+      on: { ...this.$listeners, select: this.selfSelect, "selection-change": this.selfSelectionChange },
+    }, this.$slots.default)
   },
   methods: {
     selfSelect (selected, row) {
