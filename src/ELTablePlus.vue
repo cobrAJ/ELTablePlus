@@ -21,13 +21,26 @@ export default {
     }
   },
   render (h) {
-    typeof h != "function" ? h = require("vue").h : '';
-    return h("el-table", {
-      class: { 'el-table-plus': true, ...this.$class },
-      attrs: { ...this.$attrs, 'data': this.tableData, "max-height": this.$attrs['max-height'] || this.selfMaxHeight },
-      props: { ...this.$props },
-      on: { ...this.$listeners, select: this.selfSelect, "selection-change": this.selfSelectionChange },
-    }, this.$slots.default)
+    let finalObj = {};
+    if (typeof h != "function") {
+      h = require("vue").h;
+      finalObj.attrs = {
+        ...this.$attrs,
+        'data': this.tableData,
+        "max-height": this.$attrs['max-height'] || this.selfMaxHeight,
+        "onSelect": this.selfSelect,
+        "selectionChange": this.selfSelectionChange
+      };
+      finalObj.props = { ...this.$props };
+    } else {
+      finalObj.attrs = { ...this.$attrs, 'data': this.tableData, "max-height": this.$attrs['max-height'] || this.selfMaxHeight };
+      finalObj.props = { ...this.$props };
+      finalObj.class = {
+        'el-table-plus': true, ...this.$class
+      };
+      finalObj.on = { ...this.$listeners, select: this.selfSelect, "selection-change": this.selfSelectionChange };
+    }
+    return h("el-table", finalObj, this.$slots.default)
   },
   methods: {
     selfSelect (selected, row) {
