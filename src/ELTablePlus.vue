@@ -21,6 +21,7 @@ export default {
     }
   },
   render (h) {
+    typeof h != "function" ? h = require("vue").h : '';
     return h("el-table", {
       class: { 'el-table-plus': true, ...this.$class },
       attrs: { ...this.$attrs, 'data': this.tableData, "max-height": this.$attrs['max-height'] || this.selfMaxHeight },
