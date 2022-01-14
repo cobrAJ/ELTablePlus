@@ -56,7 +56,7 @@ export default {
       let columnMinWidth = 0;
       this.columnPages = [];
       tmp.forEach(col => {
-        if (!col.componentOptions.propsData.fixed) {
+        if (col && !col.componentOptions.propsData.fixed) {
           if (col.componentOptions.propsData.width) {
             columnMinWidth += parseFloat(col.componentOptions.propsData.width)
           } else {
