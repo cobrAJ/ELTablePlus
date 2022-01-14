@@ -1,5 +1,5 @@
 <script>
-import lodash from "lodash"
+import "lodash"
 // import massData from "@/json/massData2.json"
 export default {
   name: "ELTablePlus",
@@ -209,7 +209,7 @@ export default {
       this.pagination.currentPage += 1
     }
     this.massDataTableDom = document.querySelector('.el-table__body-wrapper');
-    this.massDataTableDom.onscroll = lodash.debounce(this.scrollhandler, 100)
+    this.massDataTableDom.onscroll = _.debounce(this.scrollhandler, 200)
   },
 }
 </script>
