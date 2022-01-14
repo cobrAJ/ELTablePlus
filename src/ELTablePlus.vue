@@ -126,7 +126,7 @@ export default {
     },
     scrollhandler () {
       // console.log("scrollLeft:", this.massDataTableDom.scrollLeft, "lastScrollLeft:", this.lastScrollLeft);
-      let needVerticalFresh = true, needHorizontalFresh = true, sign = this.massDataTableDom.scrollTop > this.lastScrollTop ? 'down'
+      let needVerticalFresh = true, needHorizontalFresh = false, sign = this.massDataTableDom.scrollTop > this.lastScrollTop ? 'down'
         : this.massDataTableDom.scrollTop < this.lastScrollTop ? "up" : this.massDataTableDom.scrollLeft > this.lastScrollLeft ? 'right' :
           this.massDataTableDom.scrollLeft < this.lastScrollLeft ? 'left' : this.lastSign;
       // console.log("scrollTop:", this.massDataTableDom.scrollTop, "offsetHeight:", this.massDataTableDom.offsetHeight, "scrollHeight:", this.massDataTableDom.scrollHeight, "sign:", sign);
@@ -139,11 +139,11 @@ export default {
       } else {
         needVerticalFresh = false
         if (this.needColumnPage && sign == "left" && this.massDataTableDom.scrollLeft == 0 && this.colCurrentPage > 1) {
+          needHorizontalFresh = true;
           this.colCurrentPage -= 1
         } else if (this.needColumnPage && sign == "right" && this.massDataTableDom.scrollLeft >= (window.innerWidth - 80)) {
+          needHorizontalFresh = true;
           this.colCurrentPage += 1
-        } else {
-          needHorizontalFresh = false;
         }
       }
       if (needVerticalFresh) {
@@ -177,7 +177,6 @@ export default {
         })
       }
       if (needHorizontalFresh) {
-        console.log(this.columnPages[this.colCurrentPage - 1].concat(this.columnPages[this.colCurrentPage]));
         this.currentSlotDefault = this.columnPages[this.colCurrentPage - 1].concat(this.columnPages[this.colCurrentPage]);
         this.$nextTick(() => {
           if (sign == 'right') {
