@@ -23,6 +23,7 @@ export default {
       currentSlotDefault: [],
       needColumnPage: false,
       columnPages: [],
+      fixedCols: [],
       colCurrentPage: 1
     }
   },
@@ -55,14 +56,16 @@ export default {
       let columnMinWidth = 0;
       this.columnPages = [];
       tmp.forEach(col => {
-        if (col.width) {
-          columnMinWidth += parseFloat(col.width)
-        } else {
-          columnMinWidth += 80
+        if (!col.componentOptions.propsData.fixed) {
+          if (col.width) {
+            columnMinWidth += parseFloat(col.width)
+          } else {
+            columnMinWidth += 80
+          }
+          let index = parseInt(columnMinWidth / window.innerWidth);
+          this.columnPages[index] ? '' : this.columnPages[index] = [];
+          this.columnPages[index].push(col);
         }
-        let index = parseInt(columnMinWidth / window.innerWidth);
-        this.columnPages[index] ? '' : this.columnPages[index] = [];
-        this.columnPages[index].push(col);
       });
     },
     columnRenderCheck () {
@@ -70,22 +73,26 @@ export default {
       let outPutTmp = [];
       let columnMinWidth = 0;
       tmp.forEach(col => {
-        if (col.width) {
-          columnMinWidth += parseFloat(col.width)
+        if (col.componentOptions.propsData.fixed) {
+          this.fixedCols.push(col);
         } else {
-          columnMinWidth += 80
-        }
-        // 大于屏幕宽度两倍的列数据不渲染
-        if (columnMinWidth < window.innerWidth * 2) {
-          outPutTmp.push(col)
-        } else {
-          this.needColumnPage = true
+          if (col.width) {
+            columnMinWidth += parseFloat(col.width)
+          } else {
+            columnMinWidth += 80
+          }
+          // 大于屏幕宽度两倍的列数据不渲染
+          if (columnMinWidth < window.innerWidth * 2) {
+            outPutTmp.push(col)
+          } else {
+            this.needColumnPage = true
+          }
         }
       });
       if (this.needColumnPage) {
         this.columnDataSplit();
       }
-      return outPutTmp
+      return this.fixedCols.concat(outPutTmp)
     },
     selfSelect (selected, row) {
       let signIndex = -1;
@@ -177,7 +184,7 @@ export default {
         })
       }
       if (needHorizontalFresh) {
-        this.currentSlotDefault = this.columnPages[this.colCurrentPage - 1].concat(this.columnPages[this.colCurrentPage]);
+        this.currentSlotDefault = this.fixedCols.concat(this.columnPages[this.colCurrentPage - 1], this.columnPages[this.colCurrentPage]);
         this.$nextTick(() => {
           if (sign == 'right') {
             this.massDataTableDom.scrollLeft = 0;
