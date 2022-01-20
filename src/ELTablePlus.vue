@@ -1,6 +1,5 @@
 <script>
 import "lodash"
-// import massData from "@/json/massData2.json"
 export default {
   name: "ELTablePlus",
   data () {
