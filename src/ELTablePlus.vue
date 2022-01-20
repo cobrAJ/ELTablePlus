@@ -5,12 +5,11 @@ export default {
   name: "ELTablePlus",
   data () {
     return {
-      massData: [],
-      tableData: [],
+      massData: [],//传入的data数据副本
+      tableData: [],//进入表格的数据
       pagination: {
-        pageSize: this.$attrs['max-height'] ? Math.ceil(this.$attrs['max-height'] / 500) * 15 : 15,
+        pageSize: this.$attrs['max-height'] ? Math.ceil(this.$attrs['max-height'] / 500) * 15 : 15,//500px 15条数据
         currentPage: 1,
-        total: 0
       },
       massDataTableDom: '',
       lastScrollTop: "",
@@ -25,6 +24,12 @@ export default {
       columnPages: [],
       fixedCols: [],
       colCurrentPage: 1
+    }
+  },
+  watch: {
+    "$attrs.data": function (nValue, oValue) {
+      this.pagination.currentPage = 1;
+      this.dataInit()
     }
   },
   render (h) {
@@ -129,7 +134,8 @@ export default {
       }
     },
     dataSplit (pageNum) {
-      return this.massData.slice(((pageNum || this.pagination.currentPage) - 1) * this.pagination.pageSize, (pageNum || this.pagination.currentPage) * this.pagination.pageSize);
+      let res = this.massData.slice(((pageNum || this.pagination.currentPage) - 1) * this.pagination.pageSize, (pageNum || this.pagination.currentPage) * this.pagination.pageSize);
+      return res;
     },
     scrollhandler () {
       // console.log("scrollLeft:", this.massDataTableDom.scrollLeft, "lastScrollLeft:", this.lastScrollLeft);
@@ -140,7 +146,8 @@ export default {
       if (this.pagination.currentPage > 2 && this.massDataTableDom.scrollTop == 0 && sign == "up") {
         this.pagination.currentPage -= 1;
         this.selectPageNumChange = true;
-      } else if (this.massDataTableDom.scrollTop + this.massDataTableDom.offsetHeight >= this.massDataTableDom.scrollHeight && sign == "down") {
+      } else if (this.massDataTableDom.scrollTop + this.massDataTableDom.offsetHeight >= this.massDataTableDom.scrollHeight && sign == "down" &&
+        this.pagination.currentPage <= Math.ceil(this.massData.length / this.pagination.pageSize)) {
         this.pagination.currentPage += 1;
         this.selectPageNumChange = true;
       } else {
@@ -196,17 +203,20 @@ export default {
       this.lastSign = sign;
       this.lastScrollTop = this.massDataTableDom.scrollTop;
       this.lastScrollLeft = this.massDataTableDom.scrollLeft;
+    },
+    dataInit () {
+      this.massData = JSON.parse(JSON.stringify(this.$attrs.data));
+      let initData = this.dataSplit(this.pagination.currentPage);
+      initData.splice(initData.length, 0, ...this.dataSplit(this.pagination.currentPage + 1));
+      this.tableData = initData;
+      this.pagination.currentPage += 1
     }
   },
   mounted () {
     this.currentSlotDefault = this.columnRenderCheck(0)
     // console.log("pagination.pageSize:", this.pagination.pageSize)
     if (this.$attrs.data && this.$attrs.data.length > 0) {
-      this.massData = JSON.parse(JSON.stringify(this.$attrs.data));
-      let initData = this.dataSplit(this.pagination.currentPage);
-      initData.splice(initData.length, 0, ...this.dataSplit(this.pagination.currentPage + 1));
-      this.tableData = initData;
-      this.pagination.currentPage += 1
+      this.dataInit();
     }
     this.massDataTableDom = document.querySelector('.el-table__body-wrapper');
     this.massDataTableDom.onscroll = _.debounce(this.scrollhandler, 200)
