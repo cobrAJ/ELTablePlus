@@ -218,7 +218,7 @@ export default {
       this.dataInit();
     }
     this.massDataTableDom = document.querySelector('.el-table__body-wrapper');
-    this.massDataTableDom.onscroll = _.debounce(this.scrollhandler, 200)
+    this.massDataTableDom.onscroll = this.scrollhandler
   },
 }
 </script>
