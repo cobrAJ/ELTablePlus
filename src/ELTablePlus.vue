@@ -1,14 +1,26 @@
 <script>
 import "lodash"
+// import massData from "@/json/massData2.json"
 export default {
   name: "ELTablePlus",
+  props: {
+    bufferDataPages: {
+      type: Number,
+      default: 6
+    },
+    getMassDataCallback: {
+      type: Function,
+      default: (pageInfos, callback) => { }
+    }
+  },
   data () {
     return {
-      massData: [],//传入的data数据副本
-      tableData: [],//进入表格的数据
+      massData: [],
+      tableData: [],
       pagination: {
-        pageSize: this.$attrs['max-height'] ? Math.ceil(this.$attrs['max-height'] / 500) * 15 : 15,//500px 15条数据
+        pageSize: this.$attrs['max-height'] ? Math.ceil(this.$attrs['max-height'] / 500) * 15 : 15,
         currentPage: 1,
+        total: 0
       },
       massDataTableDom: '',
       lastScrollTop: "",
@@ -22,13 +34,8 @@ export default {
       needColumnPage: false,
       columnPages: [],
       fixedCols: [],
-      colCurrentPage: 1
-    }
-  },
-  watch: {
-    "$attrs.data": function (nValue, oValue) {
-      this.pagination.currentPage = 1;
-      this.dataInit()
+      colCurrentPage: 1,
+      bufferCurrentPage: 1
     }
   },
   render (h) {
@@ -53,6 +60,13 @@ export default {
       finalObj.on = { ...this.$listeners, select: this.selfSelect, "selection-change": this.selfSelectionChange };
     }
     return h("el-table", finalObj, this.currentSlotDefault)
+  },
+  watch: {
+    "pagination.currentPage": function (nValue, oValue) {
+      if (Math.ceil(this.bufferDataPages * this.bufferCurrentPage / 2) == this.pagination.currentPage) {
+        this.getBufferData();
+      }
+    }
   },
   methods: {
     columnDataSplit () {
@@ -133,8 +147,7 @@ export default {
       }
     },
     dataSplit (pageNum) {
-      let res = this.massData.slice(((pageNum || this.pagination.currentPage) - 1) * this.pagination.pageSize, (pageNum || this.pagination.currentPage) * this.pagination.pageSize);
-      return res;
+      return this.massData.slice(((pageNum || this.pagination.currentPage) - 1) * this.pagination.pageSize, (pageNum || this.pagination.currentPage) * this.pagination.pageSize);
     },
     scrollhandler () {
       // console.log("scrollLeft:", this.massDataTableDom.scrollLeft, "lastScrollLeft:", this.lastScrollLeft);
@@ -145,8 +158,7 @@ export default {
       if (this.pagination.currentPage > 2 && this.massDataTableDom.scrollTop == 0 && sign == "up") {
         this.pagination.currentPage -= 1;
         this.selectPageNumChange = true;
-      } else if (this.massDataTableDom.scrollTop + this.massDataTableDom.offsetHeight >= this.massDataTableDom.scrollHeight && sign == "down" &&
-        this.pagination.currentPage <= Math.ceil(this.massData.length / this.pagination.pageSize)) {
+      } else if (this.massDataTableDom.scrollTop + this.massDataTableDom.offsetHeight >= this.massDataTableDom.scrollHeight && sign == "down") {
         this.pagination.currentPage += 1;
         this.selectPageNumChange = true;
       } else {
@@ -203,19 +215,28 @@ export default {
       this.lastScrollTop = this.massDataTableDom.scrollTop;
       this.lastScrollLeft = this.massDataTableDom.scrollLeft;
     },
-    dataInit () {
-      this.massData = JSON.parse(JSON.stringify(this.$attrs.data));
+    getBufferData (callback) {
+      let _this = this
+      _this.getMassDataCallback({ pageSize: _this.pagination.pageSize * _this.bufferDataPages, currentPage: _this.bufferCurrentPage }, (addData) => {
+        _this.massData = [..._this.massData, ...addData];
+        _this.bufferCurrentPage++;
+        callback ? callback() : '';
+      })
+    },
+    appInit () {
       let initData = this.dataSplit(this.pagination.currentPage);
       initData.splice(initData.length, 0, ...this.dataSplit(this.pagination.currentPage + 1));
       this.tableData = initData;
-      this.pagination.currentPage += 1
+      this.pagination.currentPage += 1;
     }
   },
   mounted () {
     this.currentSlotDefault = this.columnRenderCheck(0)
-    // console.log("pagination.pageSize:", this.pagination.pageSize)
     if (this.$attrs.data && this.$attrs.data.length > 0) {
-      this.dataInit();
+      this.massData = JSON.parse(JSON.stringify(this.$attrs.data));
+      this.appInit();
+    } else {
+      this.getBufferData(this.appInit);
     }
     this.massDataTableDom = document.querySelector('.el-table__body-wrapper');
     this.massDataTableDom.onscroll = this.scrollhandler
