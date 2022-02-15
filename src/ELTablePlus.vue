@@ -223,21 +223,31 @@ export default {
         callback ? callback() : '';
       })
     },
-    appInit () {
+    dataInit () {
       let initData = this.dataSplit(this.pagination.currentPage);
       initData.splice(initData.length, 0, ...this.dataSplit(this.pagination.currentPage + 1));
       this.tableData = initData;
       this.pagination.currentPage += 1;
+    },
+    appInit () {
+      if (this.$attrs.data && this.$attrs.data.length > 0) {
+        this.massData = JSON.parse(JSON.stringify(this.$attrs.data));
+        this.dataInit();
+      } else {
+        this.getBufferData(this.dataInit);
+      }
+    },
+    dataReset () {
+      this.massData = [];
+      this.tableData = [];
+      this.pagination.currentPage = 1;
+      this.bufferCurrentPage = 1;
+      this.appInit();
     }
   },
   mounted () {
-    this.currentSlotDefault = this.columnRenderCheck(0)
-    if (this.$attrs.data && this.$attrs.data.length > 0) {
-      this.massData = JSON.parse(JSON.stringify(this.$attrs.data));
-      this.appInit();
-    } else {
-      this.getBufferData(this.appInit);
-    }
+    this.currentSlotDefault = this.columnRenderCheck()
+    this.appInit();
     this.massDataTableDom = document.querySelector('.el-table__body-wrapper');
     this.massDataTableDom.onscroll = this.scrollhandler
   },
